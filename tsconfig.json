@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    /* Language and environment */
+    "target": "ES2023", // 
+    "lib": ["ES2023"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolvePackageJsonExports": true,
+
+    /* Output */
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "removeComments": true,
+
+    /* Strictness */
+    "strict": false,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    /* NestJS / decorators */
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    
+    /* Interop */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+     /* Speed & DX */
+    "incremental": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "isolatedModules": true,
+    "declaration": true,
+    
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false
+  }
+}
