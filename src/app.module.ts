@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { PostsModule } from './posts/posts.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 // import { PostModel } from './posts/model/post.model';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -13,12 +15,15 @@ import { SequelizeModule } from '@nestjs/sequelize';
       port: 3306,
       username: 'root',
       password: 'admin123',
-      database: 'sys',
+      database: 'blog',
       // models: [PostModel],
       autoLoadModels: true,
       synchronize: true,
+      logging: true,
     }),
     PostsModule,
+    UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

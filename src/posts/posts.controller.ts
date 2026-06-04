@@ -18,7 +18,7 @@ import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/createPost.dto';
 import { UpdatePostDto } from './dto/updatePost.dto';
 import { PostExistPipe } from './pipes/postExist.pipe';
-import { Post as PostModule } from './model/post.model';
+import { Post as PostModule } from './post.entity';
 
 @Controller('/posts')
 export class PostsController {

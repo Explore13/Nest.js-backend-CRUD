@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 // import { IPost } from './interface/post.interface';
 import { InjectModel } from '@nestjs/sequelize';
-import { Post } from './model/post.model';
+import { Post } from './post.entity';
 import { CreatePostDto } from './dto/createPost.dto';
 import { UpdatePostDto } from './dto/updatePost.dto';
 
@@ -125,8 +125,8 @@ export class PostsService {
   }
 
   // create new post
-  createPost(createUserData: CreatePostDto): Promise<Post> {
-    return this.postModel.create(createUserData);
+  createPost(createPostData: CreatePostDto): Promise<Post> {
+    return this.postModel.create(createPostData);
   }
 
   // update a post
