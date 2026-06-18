@@ -5,6 +5,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { Post } from './post.entity';
 
 @Module({
+  // this will make the post repository available for injection
   imports: [SequelizeModule.forFeature([Post])],
   providers: [PostsService],
   controllers: [PostsController],

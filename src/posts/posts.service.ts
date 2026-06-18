@@ -1,109 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 // import { IPost } from './interface/post.interface';
 import { InjectModel } from '@nestjs/sequelize';
 import { Post } from './post.entity';
 import { CreatePostDto } from './dto/createPost.dto';
 import { UpdatePostDto } from './dto/updatePost.dto';
-
-// @Injectable()
-// export class PostsService {
-//   // private posts: Post[] = [
-//   //   {
-//   //     id: 1,
-//   //     title: 'First Post',
-//   //     content: 'First Content',
-//   //     author: 'Surya',
-//   //     createdAt: new Date(),
-//   //   },
-//   //   {
-//   //     id: 2,
-//   //     title: 'Second Post',
-//   //     content: 'Second Content',
-//   //     author: 'Surya',
-//   //     createdAt: new Date(),
-//   //   },
-//   // ];
-
-//   constructor(
-//     @InjectModel(Post)
-//     private readonly postModel: typeof Post,
-//   ) {}
-
-//   // find all posts
-//   findAll(): Promise<Post[]> {
-//     // return this.posts;
-//     return this.postModel.findAll();
-//   }
-
-//   // find post by Id
-//   async findById(id: number): Promise<Post> {
-//     // const post = this.posts.find((p) => p.id === id);
-//     const post = await this.postModel.findByPk(id);
-//     if (!post) throw new NotFoundException(`Post with ID ${id} is not found`);
-//     return post;
-//   }
-
-//   // create new post
-//   async createPost(createPostData: CreatePostDto): Promise<Post> {
-//     // const newPost: Post = {
-//     //   id: this.generatePostId(),
-//     //   ...createPostData,
-//     //   createdAt: new Date(),
-//     // };
-
-//     // this.posts.push(newPost);
-
-//     return await this.postModel.create(createPostData);
-//   }
-
-//   // generate new post Id
-//   // private generatePostId(): number {
-//   //   return this.posts.length > 0
-//   //     ? Math.max(...this.posts.map((post) => post.id)) + 1
-//   //     : 1;
-//   // }
-
-//   // update post
-//   async updatePost(id: number, updatePostData: UpdatePostDto) {
-//     // const currentPostIndex = this.posts.findIndex((post) => post.id === id);
-//     // if (currentPostIndex === -1)
-//     // throw new NotFoundException(`Post with ID ${id} is not found.`);
-//     // this.posts[currentPostIndex] = {
-//     //   ...this.posts[currentPostIndex],
-//     //   ...updatePostData,
-//     //   updatedAt: new Date(),
-//     // };
-//     // return this.posts[currentPostIndex];
-
-//     const post = await this.postModel.findByPk(id);
-//     if (!post) throw new NotFoundException(`Post with ID ${id} is not found`);
-//     const newData = {
-//       ...post,
-//       ...updatePostData,
-//     };
-
-//     return await post.update(newData);
-//   }
-
-//   // delete post
-//   async deletePost(id: number): Promise<{ message: string; data: Post }> {
-//     // const currentIndex = this.posts.findIndex((post) => post.id === id);
-//     // if (currentIndex === -1)
-//     //   throw new NotFoundException(`Post with ID ${id} is not found`);
-
-//     // const post = this.posts[currentIndex];
-//     // this.posts.splice(currentIndex, 1)
-//     const post = await this.postModel.findByPk(id);
-//     if (!post) throw new NotFoundException(`Post with ID ${id} is not found`);
-
-//     await post.destroy();
-
-//     return {
-//       message: `Post with ID ${post?.id} is deleted successfully`,
-//       data: post,
-//     };
-//   }
-// }
+import { Role, User } from '../users/users.entity';
 
 @Injectable()
 export class PostsService {
@@ -114,38 +19,116 @@ export class PostsService {
 
   // find all posts
   async findAll(): Promise<Post[]> {
-    return this.postModel.findAll();
+    return this.postModel.findAll({
+      include: [
+        {
+          model: User,
+          as: 'author',
+          attributes: {
+            exclude: ['password'],
+          },
+        },
+      ],
+    });
   }
 
   // find post by ID
   async findById(id: number): Promise<Post> {
-    const post = await this.postModel.findByPk(id);
+    const post = await this.postModel.findByPk(id, {
+      include: [
+        {
+          model: User,
+          as: 'author',
+          attributes: {
+            exclude: ['password'],
+          },
+        },
+      ],
+    });
     if (!post) throw new NotFoundException(`Post with ID ${id} is not found`);
     return post;
   }
 
   // create new post
-  createPost(createPostData: CreatePostDto): Promise<Post> {
-    return this.postModel.create(createPostData);
+  async createPost(
+    createPostData: CreatePostDto,
+    authorId: number,
+  ): Promise<Post> {
+    console.log(authorId);
+
+    return this.postModel.create(
+      { ...createPostData, authorId },
+      {
+        include: [
+          {
+            model: User,
+            as: 'author',
+            attributes: {
+              exclude: ['password'],
+            },
+          },
+        ],
+      },
+    );
   }
 
   // update a post
-  async updatePost(id: number, updatePostData: UpdatePostDto): Promise<Post> {
-    const post = await this.postModel.findByPk(id);
-    if (!post) throw new NotFoundException(`Post with ID ${id} is not found`);
+  async updatePost(
+    id: number,
+    updatePostData: UpdatePostDto,
+    author: User,
+  ): Promise<Post> {
+    const post = await this.findPostOrThrow(id);
+    if (author.role !== Role.ADMIN && post.authorId !== author.id) {
+      throw new ForbiddenException(`You can not update this post`);
+    }
     const newPostData = {
       ...post,
       ...updatePostData,
     };
 
-    return post.update(newPostData);
+    await post.update(newPostData);
+    return post;
   }
 
   // delete a post
   async deletePost(id: number): Promise<{ data: Post; isDeleted: boolean }> {
-    const post = await this.postModel.findByPk(id);
-    if (!post) throw new NotFoundException(`Post with ID ${id} is not found`);
+    const post = await this.findPostOrThrow(id);
     await post.destroy();
     return { data: post, isDeleted: true };
+  }
+
+  // restore a soft deleted post
+
+  async restorePost(id: number): Promise<{ data: Post; isRestored: boolean }> {
+    const post = await this.findPostOrThrow(id, false);
+
+    await post.restore();
+
+    return { data: post, isRestored: true };
+  }
+
+  private async findPostOrThrow(
+    id: number,
+    paranoid: boolean = true,
+  ): Promise<Post> {
+    const post = await this.postModel.findByPk(id, {
+      paranoid,
+      include: [
+        {
+          model: User,
+          as: 'author',
+          attributes: {
+            exclude: ['password'],
+          },
+        },
+      ],
+    });
+
+    if (!post) {
+      throw new NotFoundException(`Post with ID ${id} is not found`);
+    }
+
+    return post;
   }
 }

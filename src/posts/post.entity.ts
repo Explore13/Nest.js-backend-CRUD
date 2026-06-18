@@ -14,10 +14,11 @@ import { User } from '../users/users.entity';
 @Table({
   tableName: 'posts',
   timestamps: true,
+  paranoid: true, // Enables soft delete functionality
 })
 export class Post extends Model<
   IPost,
-  Optional<IPost, 'id' | 'createdAt' | 'updatedAt'>
+  Optional<IPost, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>
 > {
   @Column({
     type: DataType.INTEGER,
@@ -38,18 +39,12 @@ export class Post extends Model<
   })
   declare content: string;
 
+  @ForeignKey(() => User)
   @Column({
-    type: DataType.STRING,
     allowNull: false,
   })
-  declare author: string;
+  declare authorId: number;
 
-  // 1. Define the Foreign Key column
-  @ForeignKey(() => User)
-  @Column
-  userId: number;
-
-  // 2. Define the Association
-  @BelongsTo(() => User)
-  user: User;
+  @BelongsTo(() => User, 'authorId')
+  declare author: User;
 }

@@ -2,7 +2,7 @@
 import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
 import { Post } from '../posts/post.entity';
 
-enum Role {
+export enum Role {
   ADMIN = 'admin',
   USER = 'user',
 }
@@ -44,6 +44,6 @@ export class User extends Model {
   })
   declare role: Role;
 
-  @HasMany(() => Post)
+  @HasMany(() => Post, 'authorId')
   posts: Post[];
 }

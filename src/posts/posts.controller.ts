@@ -9,9 +9,11 @@ import {
   NotFoundException,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 // import type { IPost as PostInterface } from './interface/post.interface';
@@ -19,7 +21,12 @@ import { CreatePostDto } from './dto/createPost.dto';
 import { UpdatePostDto } from './dto/updatePost.dto';
 import { PostExistPipe } from './pipes/postExist.pipe';
 import { Post as PostModule } from './post.entity';
-
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/role.guard';
+import { Roles } from '../auth/decorators/roles.decorators';
+import { Role, User } from '../users/users.entity';
+import { CurrentUser } from '../auth/decorators/current-user.decorators';
+@UseGuards(JwtAuthGuard)
 @Controller('/posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
@@ -56,7 +63,7 @@ export class PostsController {
   }
 
   @Get('/:id')
-  // @HttpCode(HttpStatus.FOUND)
+  @HttpCode(HttpStatus.FOUND)
   async findById(
     @Param('id', ParseIntPipe, PostExistPipe) id: number,
   ): Promise<{ message: string; data?: PostModule; status: HttpStatus }> {
@@ -86,14 +93,11 @@ export class PostsController {
   //     forbidNonWhitelisted: true,
   //   }),
   // )
-  async createPost(@Body() postData: CreatePostDto) {
+  async createPost(@Body() postData: CreatePostDto, @CurrentUser() user: User) {
     try {
-      if (!postData)
-        throw new HttpException(
-          'Post Data can not be empty',
-          HttpStatus.BAD_REQUEST,
-        );
-      const post = await this.postsService.createPost(postData);
+      console.log(user);
+
+      const post = await this.postsService.createPost(postData, user.id);
       return {
         message: `New Post with ID ${post.id} is created successfullly`,
         data: post,
@@ -110,18 +114,30 @@ export class PostsController {
   async updatePost(
     @Param('id', ParseIntPipe, PostExistPipe) id: number,
     @Body() updatePostData: UpdatePostDto,
+    @CurrentUser() user: User,
   ) {
     try {
-      console.log('id : ', id);
+      console.log(user);
 
-      const data = await this.postsService.updatePost(id, updatePostData);
+      const data = await this.postsService.updatePost(id, updatePostData, user);
       return { message: `Post with ID ${id} is updated successfully`, data };
     } catch (error) {
       console.log(error);
-      throw new HttpException('Post is not updated', HttpStatus.NOT_MODIFIED);
+
+      if (error instanceof HttpException)
+        return {
+          message: error.message,
+          status: error.getStatus(),
+        };
+      return {
+        message: `Post is not updated'`,
+        status: HttpStatus.NOT_MODIFIED,
+      };
     }
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
   @Delete('/delete-post/:id')
   @HttpCode(HttpStatus.OK)
   async deletePost(@Param('id', ParseIntPipe, PostExistPipe) id: number) {
@@ -132,10 +148,41 @@ export class PostsController {
       return { message: `Post with ID ${id} is not deleted`, data: data.data };
     } catch (error) {
       console.log(error);
-      throw new HttpException(
-        'Post is not deleted successfully',
-        HttpStatus.NOT_MODIFIED,
-      );
+
+      if (error instanceof HttpException)
+        return {
+          message: error.message,
+          status: error.getStatus(),
+        };
+      return {
+        message: `Post is not deleted successfully`,
+        status: HttpStatus.NOT_MODIFIED,
+      };
+    }
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch('/restore-post/:id')
+  @HttpCode(HttpStatus.OK)
+  async restorePost(@Param('id', ParseIntPipe) id: number) {
+    try {
+      const data = await this.postsService.restorePost(id);
+      if (data.isRestored)
+        return { message: `Post with ID ${id} is restored`, data: data.data };
+      return { message: `Post with ID ${id} is not restored`, data: data.data };
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof HttpException)
+        return {
+          message: error.message,
+          status: error.getStatus(),
+        };
+      return {
+        message: `Post can not be restored`,
+        status: HttpStatus.BAD_REQUEST,
+      };
     }
   }
 }
