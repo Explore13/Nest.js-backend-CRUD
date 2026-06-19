@@ -30,7 +30,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
       // models: [Post], --> as I wrote autoLoadModels : true, we do not need to mention the models explicitly
       autoLoadModels: true,
       synchronize: true,
-      logging: true,
+      logging: false,
     }),
     PostsModule,
     UsersModule,

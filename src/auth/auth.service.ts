@@ -104,6 +104,7 @@ export class AuthService {
       const accessToken = this.generateAccessToken(user);
       return { accessToken };
     } catch (e) {
+      console.log(e);
       throw new UnauthorizedException('Invalid token ');
     }
   }
@@ -113,9 +114,7 @@ export class AuthService {
 
     if (!user) throw new UnauthorizedException('Invalid token');
 
-    const { password, ...result } = user.toJSON();
-
-    return result;
+    return user;
   }
 
   private async hashedPassword(password: string) {
@@ -143,7 +142,7 @@ export class AuthService {
 
     return this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET_ACCESS_TOKEN,
-      expiresIn: '15m',
+      expiresIn: '1h',
     });
   }
 

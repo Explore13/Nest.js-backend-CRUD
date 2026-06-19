@@ -26,6 +26,8 @@ import { RolesGuard } from '../auth/guards/role.guard';
 import { Roles } from '../auth/decorators/roles.decorators';
 import { Role, User } from '../users/users.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorators';
+import { FindPostsQueryDto } from './dto/find-posts-query.dto';
+import { PaginatedResponse } from '../common/interface/paginated-response.interface';
 @UseGuards(JwtAuthGuard)
 @Controller('/posts')
 export class PostsController {
@@ -33,23 +35,20 @@ export class PostsController {
 
   @Get()
   @HttpCode(HttpStatus.ACCEPTED)
-  async findAll(@Query('search') search: string): Promise<{
+  async findAll(@Query() query: FindPostsQueryDto): Promise<{
     message: string;
     status: HttpStatus;
-    data?: PostModule[] | [];
+    data?: PaginatedResponse<PostModule>;
   }> {
     try {
-      let allPosts = await this.postsService.findAll();
-      if (search)
-        allPosts = allPosts.filter((post) =>
-          post.title.toLowerCase().includes(search.toLowerCase()),
-        );
+      const allPosts = await this.postsService.findAll(query);
       return {
         message: `All posts are fetched successfully`,
         data: allPosts,
         status: HttpStatus.ACCEPTED,
       };
     } catch (error) {
+      console.log(error);
       if (error instanceof HttpException)
         return {
           message: error.message,
@@ -64,7 +63,7 @@ export class PostsController {
 
   @Get('/:id')
   @HttpCode(HttpStatus.FOUND)
-  async findById(
+  async getPostById(
     @Param('id', ParseIntPipe, PostExistPipe) id: number,
   ): Promise<{ message: string; data?: PostModule; status: HttpStatus }> {
     try {
@@ -95,8 +94,6 @@ export class PostsController {
   // )
   async createPost(@Body() postData: CreatePostDto, @CurrentUser() user: User) {
     try {
-      console.log(user);
-
       const post = await this.postsService.createPost(postData, user.id);
       return {
         message: `New Post with ID ${post.id} is created successfullly`,
@@ -117,8 +114,6 @@ export class PostsController {
     @CurrentUser() user: User,
   ) {
     try {
-      console.log(user);
-
       const data = await this.postsService.updatePost(id, updatePostData, user);
       return { message: `Post with ID ${id} is updated successfully`, data };
     } catch (error) {
