@@ -9,7 +9,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Post } from './post.entity';
 import { CreatePostDto } from './dto/createPost.dto';
 import { UpdatePostDto } from './dto/updatePost.dto';
-import { Role, User } from '../users/users.entity';
+import { Role, User } from '../auth/users.entity';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { FindPostsQueryDto } from './dto/find-posts-query.dto';
 import { PaginatedResponse } from '../common/interface/paginated-response.interface';

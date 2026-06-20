@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Role, User } from '../../users/users.entity';
+import { Role, User } from '../users.entity';
 import { ROLES_KEY } from '../decorators/roles.decorators';
 
 export interface AuthenticatedRequest extends Request {

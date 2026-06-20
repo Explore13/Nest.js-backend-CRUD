@@ -1,4 +1,4 @@
-import { Role } from '../users/users.entity';
+import { Role } from './users.entity';
 
 export interface IPayload {
   sub: number;

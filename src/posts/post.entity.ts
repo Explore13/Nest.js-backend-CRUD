@@ -8,7 +8,7 @@ import {
 } from 'sequelize-typescript';
 import { Optional } from 'sequelize';
 import { IPost } from './interface/post.interface';
-import { User } from '../users/users.entity';
+import { User } from '../auth/users.entity';
 // import { Post } from '../interface/post.interface';
 
 @Table({

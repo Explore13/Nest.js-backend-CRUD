@@ -24,7 +24,7 @@ import { Post as PostModule } from './post.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/role.guard';
 import { Roles } from '../auth/decorators/roles.decorators';
-import { Role, User } from '../users/users.entity';
+import { Role, User } from '../auth/users.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorators';
 import { FindPostsQueryDto } from './dto/find-posts-query.dto';
 import { PaginatedResponse } from '../common/interface/paginated-response.interface';

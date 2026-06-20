@@ -15,7 +15,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorators';
 import { RolesGuard } from './guards/role.guard';
 import { Roles } from './decorators/roles.decorators';
-import { Role, User } from '../users/users.entity';
+import { Role, User } from './users.entity';
 import { LoginThrottlerGuard } from './guards/login-throttler.guard';
 // import { SkipThrottle, Throttle } from '@nestjs/throttler';
 

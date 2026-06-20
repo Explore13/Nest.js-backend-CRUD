@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { PostsModule } from './posts/posts.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 // import { PostModel } from './posts/model/post.model';
-import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 // import { Post } from './posts/post.entity';
@@ -33,7 +32,6 @@ import { ThrottlerModule } from '@nestjs/throttler';
       logging: false,
     }),
     PostsModule,
-    UsersModule,
     AuthModule,
   ],
   controllers: [AppController],
