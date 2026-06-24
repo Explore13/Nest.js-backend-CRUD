@@ -18,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     try {
       const user = await this.authService.findUserById(payload.sub.toString());
 
-      return { ...user, role: payload.role };
+      return { ...user.get({ plain: true }), role: payload.role };
     } catch (error) {
       console.log(error);
       throw new UnauthorizedException('Invalid token');

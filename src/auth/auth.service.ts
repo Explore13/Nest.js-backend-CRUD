@@ -110,13 +110,15 @@ export class AuthService {
   }
 
   async findUserById(userId: string) {
-    const user = await this.userModel.findOne({ where: { id: userId } });
+    const user = await this.userModel.findOne({
+      where: { id: userId },
+      attributes: { exclude: ['password'] },
+    });
 
     if (!user) throw new UnauthorizedException('Invalid token');
 
     return user;
   }
-
   private async hashedPassword(password: string) {
     return await bcrypt.hash(password, 10);
   }

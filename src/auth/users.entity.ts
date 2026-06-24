@@ -1,6 +1,7 @@
 // import { Model } from 'sequelize';
 import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
 import { Post } from '../posts/post.entity';
+import { FileEntity } from '../file-upload/file.entity';
 
 export enum Role {
   ADMIN = 'admin',
@@ -46,4 +47,7 @@ export class User extends Model {
 
   @HasMany(() => Post, 'authorId')
   posts: Post[];
+
+  @HasMany(() => FileEntity, 'uploaderId')
+  files: FileEntity[];
 }

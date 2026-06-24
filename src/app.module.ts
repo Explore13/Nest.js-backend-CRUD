@@ -6,10 +6,15 @@ import { SequelizeModule } from '@nestjs/sequelize';
 // import { PostModel } from './posts/model/post.model';
 import { AuthModule } from './auth/auth.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ConfigModule } from '@nestjs/config';
 // import { Post } from './posts/post.entity';
+import { FileUploadModule } from './file-upload/file-upload.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     ThrottlerModule.forRoot({
       throttlers: [
         {
@@ -29,10 +34,11 @@ import { ThrottlerModule } from '@nestjs/throttler';
       // models: [Post], --> as I wrote autoLoadModels : true, we do not need to mention the models explicitly
       autoLoadModels: true,
       synchronize: true,
-      logging: false,
+      logging: true,
     }),
     PostsModule,
     AuthModule,
+    FileUploadModule,
   ],
   controllers: [AppController],
   providers: [
